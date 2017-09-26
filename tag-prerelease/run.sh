@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 server_dir = "$(pwd) source-code"
 version = "$(cat version/number)"
 
