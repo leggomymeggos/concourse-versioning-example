@@ -2,7 +2,6 @@
 
 set -e
 
-mkdir /tmp
 touch /tmp/ssh_key
 
 cat $ssh_key > /tmp/ssh_key
