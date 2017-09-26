@@ -4,8 +4,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: bash
-    tag: '4.4'
+    repository: bravissimolabs/alpine-git
 
 inputs:
 - name: source-code
