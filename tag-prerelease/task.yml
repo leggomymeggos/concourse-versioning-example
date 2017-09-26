@@ -10,5 +10,8 @@ inputs:
 - name: source-code
 - name: version
 
+params:
+  ssh_key: ssh-key
+
 run:
   path: source-code/tag-prerelease/run.sh
