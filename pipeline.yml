@@ -1,0 +1,74 @@
+resources:
+- name: version
+  type: semver
+  source:
+    initial_version: 0.1.0
+    driver: git
+    branch: version
+    file: number
+    uri: git@github.com:leggomymeggos/concourse-versioning-example.git
+    private_key: {{private-repo-key}}
+
+- name: source-code
+  type: git
+  source:
+    branch: master
+    uri: git@github.com:leggomymeggos/concourse-versioning-example.git
+    private_key: {{private-repo-key}}
+
+jobs: 
+- name: bump-version
+  plan:
+    - get: source-code
+      trigger: true
+    - get: version
+      params: { bump: minor, pre: beta }
+    - put: version
+      params: { file: version/number }
+
+- name: run-tests
+  plan:
+    - get: version
+      trigger: true
+      passed: [bump-version]
+    - get: source-code
+      passed: [bump-version]
+    - task: run-tests
+      file: source-code/run-tests/task.yml
+
+- name: tag-prerelease
+  plan:
+    - get: version
+      trigger: true
+      passed: [run-tests]
+    - get: source-code
+      passed: [run-tests]
+    - put: source-code
+      params:
+        repository: source-code
+        tag: version/number
+        only_tag: true
+
+- name: final-test
+  plan: 
+    - get: version
+      trigger: true
+      passed: [tag-prerelease]
+    - get: source-code
+      passed: [tag-prerelease]
+    - task: final-test
+      file: source-code/final/task.yml
+
+- name: tag-release
+  plan:
+    - get: version
+      trigger: true
+      passed: [final-test]
+      params: { bump: final }
+    - get: source-code
+      passed: [final-test]
+    - put: source-code
+      params:
+        repository: source-code
+        tag: version/number
+        only_tag: true
